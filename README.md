@@ -12,7 +12,7 @@ A React Native application for managing medications with Firebase backend integr
 
 ## Technologies Used
 
-- **Frontend**: React Native with Expo
+- **Frontend**: React Native CLI
 - **Backend**: Firebase (Authentication & Firestore)
 - **Navigation**: React Navigation
 - **UI Components**: React Native Paper
@@ -24,8 +24,9 @@ A React Native application for managing medications with Firebase backend integr
 ### Prerequisites
 
 1. Install Node.js (version 14 or higher)
-2. Install Expo CLI: `npm install -g expo-cli`
-3. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
+2. Install React Native CLI: `npm install -g react-native-cli`
+3. Set up Android Studio and/or Xcode for mobile development
+4. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
 
 ### Installation
 
@@ -35,47 +36,60 @@ A React Native application for managing medications with Firebase backend integr
    npm install
    ```
 
-3. Configure Firebase:
-   - Go to your Firebase project settings
-   - Copy your Firebase config object
-   - Replace the placeholder config in `App.js` with your actual Firebase configuration:
-   
-   ```javascript
-   const firebaseConfig = {
-     apiKey: "your-actual-api-key",
-     authDomain: "your-project.firebaseapp.com",
-     projectId: "your-actual-project-id",
-     storageBucket: "your-project.appspot.com",
-     messagingSenderId: "your-sender-id",
-     appId: "your-app-id"
-   };
+3. **Android Setup**:
+   ```bash
+   cd android
+   ./gradlew clean
+   cd ..
    ```
 
-4. Enable Authentication in Firebase:
-   - Go to Firebase Console > Authentication > Sign-in method
-   - Enable "Email/Password" provider
+4. **iOS Setup** (Mac only):
+   ```bash
+   cd ios
+   pod install
+   cd ..
+   ```
 
-5. Create Firestore Database:
-   - Go to Firebase Console > Firestore Database
-   - Create database in test mode
-   - Set up the following collections:
-     - `users` (for user profiles)
-     - `medications` (for medication data)
+5. **Configure Firebase**:
+   - Go to your Firebase project settings
+   - Download `google-services.json` for Android and place it in `android/app/`
+   - Download `GoogleService-Info.plist` for iOS and add it to your Xcode project
+   - The app is already configured to use React Native Firebase
+
+6. **Enable Firebase Services**:
+   - **Authentication**: Enable Email/Password provider in Firebase Console
+   - **Firestore**: Create database in test mode
 
 ### Running the App
 
-1. Start the development server:
+1. **Start Metro bundler**:
    ```bash
    npm start
-   # or
-   expo start
    ```
 
-2. Use Expo Go app on your phone to scan the QR code, or run on simulator:
+2. **Run on Android**:
    ```bash
-   npm run ios    # for iOS simulator
-   npm run android # for Android emulator
+   npm run android
    ```
+
+3. **Run on iOS** (Mac only):
+   ```bash
+   npm run ios
+   ```
+
+## Firebase Setup
+
+### Android Configuration
+1. Go to Firebase Console → Project Settings
+2. Add Android app with package name: `com.medicationapp`
+3. Download `google-services.json`
+4. Place it in `android/app/google-services.json`
+
+### iOS Configuration
+1. Go to Firebase Console → Project Settings
+2. Add iOS app with bundle ID: `com.medicationapp`
+3. Download `GoogleService-Info.plist`
+4. Add it to your iOS project in Xcode
 
 ## App Structure
 
@@ -90,24 +104,41 @@ src/
 │   └── ProfileScreen.js       # User profile
 ```
 
+## Key Features
+
+### Authentication Flow
+- **Login Screen** → **Register Screen** (optional) → **Home Screen**
+- Automatic navigation based on authentication state
+
+### Main App Flow (Bottom Tab Navigation)
+- **Home**: Dashboard with weekly view and medication list
+- **Calendar**: Monthly calendar for medication tracking  
+- **Add**: Form to add new medications (Plus button)
+- **Profile**: User profile and settings
+
+### Navigation
+- When you click **register** or **sign in** → goes directly to **homepage**
+- When you click **calendar button** → shows calendar view
+- When you click **plus (+) button** → goes to add medication form
+
 ## Firebase Collections
 
 ### Users Collection
 ```javascript
 {
   fname: "John",
-  lname: "Doe",
+  lname: "Doe", 
   age: "30",
   gender: "Male",
   height: "6'0\"",
   weight: "180 lbs",
   contactNumber: "+1234567890",
   email: "john@example.com",
-  createdAt: "2024-01-01T00:00:00.000Z"
+  createdAt: firebase.firestore.FieldValue.serverTimestamp()
 }
 ```
 
-### Medications Collection
+### Medications Collection  
 ```javascript
 {
   name: "Aspirin",
@@ -118,71 +149,54 @@ src/
   instructions: "Take with food",
   prescribedBy: "Dr. Smith",
   startDate: "01/01/2024",
-  endDate: "01/07/2024",
+  endDate: "01/07/2024", 
   userId: "user-uid",
-  createdAt: "2024-01-01T00:00:00.000Z"
+  createdAt: firebase.firestore.FieldValue.serverTimestamp()
 }
 ```
 
-## Navigation Flow
+## Troubleshooting
 
-1. **Authentication Flow**:
-   - Login Screen → Register Screen (optional) → Home Screen
+### Common Issues
 
-2. **Main App Flow** (Bottom Tab Navigation):
-   - Home: Dashboard with weekly view and medication list
-   - Calendar: Monthly calendar for medication tracking
-   - Add: Form to add new medications
-   - Profile: User profile and settings
+1. **Metro bundler issues**:
+   ```bash
+   npx react-native start --reset-cache
+   ```
 
-## Key Features Implementation
+2. **Android build issues**:
+   ```bash
+   cd android
+   ./gradlew clean
+   cd ..
+   npm run android
+   ```
 
-### Authentication
-- Uses Firebase Authentication with email/password
-- Automatic navigation based on auth state
-- Form validation and error handling
+3. **iOS build issues**:
+   ```bash
+   cd ios
+   pod install
+   cd ..
+   npm run ios
+   ```
 
-### Home Screen
-- Weekly calendar view
-- Current day highlighting
-- Medication list for selected day
-- Empty state when no medications
+4. **Vector Icons not showing**:
+   - Make sure you've run the linking process
+   - For Android, check if fonts are properly copied
 
-### Calendar Screen
-- Full monthly calendar
-- Date selection
-- Marked dates for medications
-- Navigation between months
+### Dependencies
 
-### Add Medication Screen
-- Comprehensive form for medication details
-- Required field validation
-- Saves to Firestore with user association
-- Success feedback and navigation
+The app uses React Native Firebase which requires:
+- `@react-native-firebase/app` - Core Firebase app
+- `@react-native-firebase/auth` - Authentication
+- `@react-native-firebase/firestore` - Database
 
-### Profile Screen
-- Displays user information
-- Sign out functionality
-- Placeholder for edit profile and settings
+## Development
 
-## Customization
-
-### Colors
-The app uses a blue theme. To change colors, update the following in the StyleSheet objects:
-- Primary: `#3f51b5`
-- Success: `#4CAF50`
-- Background: `#f5f5f5`
-
-### Icons
-Icons are from Material Icons. You can change them by updating the `name` prop in `Icon` components.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+- The app uses React Native CLI (not Expo)
+- Firebase configuration is handled through native SDKs
+- Icons are from Material Icons via react-native-vector-icons
+- Navigation uses React Navigation v6
 
 ## License
 

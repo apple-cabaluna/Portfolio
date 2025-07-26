@@ -8,8 +8,7 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../App';
+import auth from '@react-native-firebase/auth';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function LoginScreen({ navigation }) {
@@ -25,7 +24,7 @@ export default function LoginScreen({ navigation }) {
 
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await auth().signInWithEmailAndPassword(email, password);
       // Navigation will be handled automatically by onAuthStateChanged
     } catch (error) {
       Alert.alert('Error', error.message);

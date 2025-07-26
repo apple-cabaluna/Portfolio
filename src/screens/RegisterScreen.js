@@ -8,9 +8,8 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../../App';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function RegisterScreen({ navigation }) {
@@ -50,16 +49,16 @@ export default function RegisterScreen({ navigation }) {
 
     setLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
       const user = userCredential.user;
 
       // Update user profile
-      await updateProfile(user, {
+      await user.updateProfile({
         displayName: `${fname} ${lname}`
       });
 
       // Save additional user data to Firestore
-      await setDoc(doc(db, 'users', user.uid), {
+      await firestore().collection('users').doc(user.uid).set({
         fname,
         lname,
         age: formData.age,
@@ -68,7 +67,7 @@ export default function RegisterScreen({ navigation }) {
         weight: formData.weight,
         contactNumber: formData.contactNumber,
         email,
-        createdAt: new Date().toISOString(),
+        createdAt: firestore.FieldValue.serverTimestamp(),
       });
 
       // Navigation will be handled automatically by onAuthStateChanged

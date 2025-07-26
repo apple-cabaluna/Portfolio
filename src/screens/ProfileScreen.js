@@ -6,9 +6,8 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import { signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../../App';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function ProfileScreen() {
@@ -21,10 +20,10 @@ export default function ProfileScreen() {
 
   const fetchUserProfile = async () => {
     try {
-      const user = auth.currentUser;
+      const user = auth().currentUser;
       if (user) {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
+        const userDoc = await firestore().collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
           setUserProfile(userDoc.data());
         }
       }
@@ -46,7 +45,7 @@ export default function ProfileScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await signOut(auth);
+              await auth().signOut();
             } catch (error) {
               Alert.alert('Error', 'Failed to sign out');
             }

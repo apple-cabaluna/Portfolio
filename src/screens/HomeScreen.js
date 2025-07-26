@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
-import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
-import { auth, db } from '../../App';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function HomeScreen() {
@@ -45,30 +45,28 @@ export default function HomeScreen() {
   };
 
   const fetchMedications = () => {
-    const user = auth.currentUser;
+    const user = auth().currentUser;
     if (!user) return;
 
-    const q = query(
-      collection(db, 'medications'),
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc')
-    );
-
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const meds = [];
-      querySnapshot.forEach((doc) => {
-        meds.push({ id: doc.id, ...doc.data() });
+    const unsubscribe = firestore()
+      .collection('medications')
+      .where('userId', '==', user.uid)
+      .orderBy('createdAt', 'desc')
+      .onSnapshot((querySnapshot) => {
+        const meds = [];
+        querySnapshot.forEach((doc) => {
+          meds.push({ id: doc.id, ...doc.data() });
+        });
+        setMedications(meds);
+        
+        // Filter today's medications
+        const today = new Date().toDateString();
+        const todaysMedications = meds.filter(med => {
+          // Simple check - in real app, you'd check schedule
+          return true; // Show all for now
+        });
+        setTodayMeds(todaysMedications);
       });
-      setMedications(meds);
-      
-      // Filter today's medications
-      const today = new Date().toDateString();
-      const todaysMedications = meds.filter(med => {
-        // Simple check - in real app, you'd check schedule
-        return true; // Show all for now
-      });
-      setTodayMeds(todaysMedications);
-    });
 
     return unsubscribe;
   };

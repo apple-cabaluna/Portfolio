@@ -8,8 +8,8 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { collection, addDoc } from 'firebase/firestore';
-import { auth, db } from '../../App';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function AddMedicationScreen({ navigation }) {
@@ -43,16 +43,16 @@ export default function AddMedicationScreen({ navigation }) {
 
     setLoading(true);
     try {
-      const user = auth.currentUser;
+      const user = auth().currentUser;
       if (!user) {
         Alert.alert('Error', 'User not authenticated');
         return;
       }
 
-      await addDoc(collection(db, 'medications'), {
+      await firestore().collection('medications').add({
         ...medicationData,
         userId: user.uid,
-        createdAt: new Date().toISOString(),
+        createdAt: firestore.FieldValue.serverTimestamp(),
       });
 
       Alert.alert('Success', 'Medication added successfully', [
